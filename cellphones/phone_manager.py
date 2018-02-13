@@ -43,14 +43,28 @@ class PhoneAssignments():
         self.phones = []
         self.employees = []
 
+    #
+    # def add_employee(self, employee):
+    #     # TODO raise exception if two employees with same ID are added
+    #     for e in self.employees:
+    #         if  e.id == employee.id:
+    #             raise PhoneError()
+    #     self.employees.append(employee)
 
     def add_employee(self, employee):
         # TODO raise exception if two employees with same ID are added
+        for e in self.employees:
+            if e.id == employee.id:
+                raise PhoneError('Employee ID %s is already assigned, can\'t add again' % employee.id)
         self.employees.append(employee)
 
 
     def add_phone(self, phone):
         # TODO raise exception if two phones with same ID are added
+        for p in self.phones:
+            if p.id == phone.id:
+                raise PhoneError('Can\'t add phones with same the same id.')
+
         self.phones.append(phone)
 
 
@@ -59,10 +73,23 @@ class PhoneAssignments():
         # TODO if phone is already assigned to an employee, do not change list, raise exception
         # TODO if employee already has a phone, do not change list, and raise exception
         # TODO if employee already has this phone, don't make any changes. This should NOT raise an exception.
+        for p in self.phones:
+            # if phone.id
+            if p.employee_id == employee.id:
+                raise PhoneError('Employee has phone with this id already')
+            if p.id == phone_id:
+                if p.is_assigned():
+                    raise PhoneError('This phone is assigned already.')
+                elif p.employee_id == employee.id:
+                    print('This emploee has this phone')
+                    # phone.assign(employee.id)
+                    return
+
         for phone in self.phones:
             if phone.id == phone_id:
                 phone.assign(employee.id)
                 return
+
 
 
     def un_assign(self, phone_id):
@@ -77,7 +104,8 @@ class PhoneAssignments():
 
         # TODO  should return None if the employee does not have a phone
         # TODO  the method should raise an exception if the employee does not exist
-
+        if employee not in self.employees:
+            raise PhoneError('Employee not found.')
         for phone in self.phones:
             if phone.employee_id == employee.id:
                 return phone
