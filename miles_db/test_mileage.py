@@ -28,6 +28,8 @@ class TestMileageDB(TestCase):
         self.compare_db_to_expected(expected)
 
 
+
+
     def test_increase_miles_for_vehicle(self):
         mileage.add_miles('Red Car', 100)
         expected = { 'Red Car': 100 }
@@ -42,6 +44,21 @@ class TestMileageDB(TestCase):
         with self.assertRaises(Exception):
             mileage.addMiles(None, 100)
 
+    def test_to_upper_case(self):
+        v1 = mileage.to_upper('yellow car')
+        mileage.add_miles(v1, 200)
+        expected = 'YELLOW CAR'
+        conn = sqlite3.connect(self.test_db_url)
+        cursor = conn.cursor()
+        all_data = cursor.execute('SELECT * FROM MILES').fetchall()
+
+        for row in all_data:
+            # Vehicle exists, and mileage is correct
+            self.assertEqual(row[0], expected)
+            # self.assertEqual(expected[row[0]], row[1])
+
+
+
 
     def test_add_new_vehicle_invalid_new_miles(self):
         with self.assertRaises(Exception):
@@ -50,6 +67,8 @@ class TestMileageDB(TestCase):
             mileage.addMiles('Car', 'abc')
         with self.assertRaises(Exception):
             mileage.addMiles('Car', '12.def')
+
+
 
 
     # This is not a test method, instead, it's used by the test methods
@@ -68,3 +87,26 @@ class TestMileageDB(TestCase):
             self.assertEqual(expected[row[0]], row[1])
 
         conn.close()
+
+
+class TestMileageDB_1(TestCase):
+
+    test_db_url = 'test_miles.db'
+
+    # The name of this method is important - the test runner will look for it
+    def setUp(self):
+        # Overwrite the mileage
+        mileage.db_url = self.test_db_url
+        # drop everything from the DB to always start with an empty database
+        conn = sqlite3.connect(self.test_db_url)
+        conn.execute('DELETE FROM miles')
+        conn.commit()
+        conn.close()
+
+    def test_search(self):
+        v1 = mileage.to_upper('white car')
+        mileage.add_miles(v1, 200)
+        search_vehicle =  mileage.search_vehicle(v1)
+
+
+        self.assertIsNotNone(search_vehicle)
